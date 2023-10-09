@@ -36,6 +36,10 @@ import com.bleplx.converter.ScanResultToJsObjectConverter;
 import com.bleplx.converter.ServiceToJsObjectConverter;
 import com.bleplx.utils.ReadableArrayConverter;
 import com.bleplx.utils.SafePromise;
+import io.reactivex.exceptions.UndeliverableException;
+import io.reactivex.plugins.RxJavaPlugins;
+import com.polidea.rxandroidble2.exceptions.BleException;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -87,6 +91,13 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
         final Activity activity = getCurrentActivity();
         if (activity == null) {
           return;
+        }
+        RxJavaPlugins.setErrorHandler { throwable ->
+        if (throwable is UndeliverableException && throwable.cause is BleException) {
+          return @setErrorHandler // ignore BleExceptions since we do not have subscriber
+        }
+        else {
+          throw throwable
         }
         bleAdapter = BleAdapterFactory.getNewAdapter(activity);
         bleAdapter.createClient(restoreStateIdentifier,
