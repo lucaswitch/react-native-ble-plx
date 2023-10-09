@@ -92,6 +92,8 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
         if (activity == null) {
           return;
         }
+      
+        // Solves the io.reactivex.exceptions.UndeliverableException when there is not subscriber to JavaRX calls.
         RxJavaPlugins.setErrorHandler { throwable ->
         if (throwable is UndeliverableException && throwable.cause is BleException) {
           return @setErrorHandler // ignore BleExceptions since we do not have subscriber
@@ -99,6 +101,8 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
         else {
           throw throwable
         }
+
+                                       
         bleAdapter = BleAdapterFactory.getNewAdapter(activity);
         bleAdapter.createClient(restoreStateIdentifier,
                 new OnEventCallback<String>() {
